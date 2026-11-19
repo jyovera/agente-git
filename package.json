@@ -1,0 +1,31 @@
+{
+  "name": "agente-git",
+  "version": "1.4.0",
+  "description": "Portable, stack-agnostic Git and GitHub workflow assistant skill for OpenCode and AntiGravity with change traceability",
+  "type": "module",
+  "bin": {
+    "agente-git": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "skills/"
+  ],
+  "keywords": [
+    "git",
+    "github",
+    "opencode",
+    "antigravity",
+    "ai-agent",
+    "skill",
+    "workflow"
+  ],
+  "author": "Jhonnatan Yovera <jhyovera123@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jyovera/agente-git.git"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
