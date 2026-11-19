@@ -39,7 +39,7 @@ Check if `ACTIVE_WORK.md` exists in the repository root. If not, initialize it w
    git config user.name
    ```
 2. Derive a 3-letter uppercase prefix based on the developer handle or name:
-   - `@jyovera` -> Prefix: `JYO`
+   - `@worker` -> Prefix: `WRK`
    - `@carlos` -> Prefix: `CAR`
    - `@maria` -> Prefix: `MAR`
 
@@ -54,7 +54,7 @@ Check if `ACTIVE_WORK.md` exists in the repository root. If not, initialize it w
 
 ### 0.3 Issue Registration Interaction
 Before modifying code:
-1. **Assign Namespaced ID**: Look at the developer's table and calculate the next sequential code (`JYO-001`, `JYO-002`, `JYO-003`, etc.).
+1. **Assign Namespaced ID**: Look at the developer's table and calculate the next sequential code (`WRK-001`, `WRK-002`, `WRK-003`, etc.).
 2. **Recommend Title**: Analyze user request and propose a concise, descriptive title.
 3. **Prompt for Priority**: Present the standardized Issue Registration Template:
 
