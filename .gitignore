@@ -14,3 +14,10 @@ yarn-error.log*
 # Environment & local credentials
 .env
 .env.local
+
+# Local IDE & Agent configurations (keep repository neutral)
+.opencode/
+.agent/
+.vscode/
+.idea/
+

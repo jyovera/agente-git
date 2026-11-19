@@ -21,9 +21,8 @@ Compatible with **OpenCode** and **AntiGravity**.
 AgenteGit/
 ├── skills/
 │   └── git-workflow-assistant/
-│       └── SKILL.md            # The portable skill definition
-├── .opencode/
-│   └── skills/                 # Local workspace test registration
+│       └── SKILL.md            # The portable, stack-agnostic skill definition
+├── .gitignore                  # Ignores local IDE setups (.opencode, .agent, etc.)
 └── README.md                   # Installation & usage documentation
 ```
 
