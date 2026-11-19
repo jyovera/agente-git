@@ -62,13 +62,13 @@ AgenteGit/
 ```markdown
 # 📋 Registro de Trabajo Activo (Active Work Log)
 
-## 👤 @jyovera
+## 👤 @worker
 
 | Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Commit Local | Enviado a Dev | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **JYO-001** | Inicializar app base y skill | Alta | Estructura base de app.js y configuración inicial de skill | `app.js`, `.gitignore` | `72c8ebd` | ✅ Enviado | Completado |
-| **JYO-002** | Agregar función despedir | Media | Se implementó despedir() y se resolvió conflicto de rebase | `app.js` | `ad8dcfc` | ✅ Enviado | Completado |
-| **JYO-003** | Validar parámetro de nombre | Media | Se implementó validarNombre() para evitar valores vacíos | `app.js` | `bacfbe5` | ✅ Enviado | Completado |
+| **WRK-001** | Inicializar app base y skill | Alta | Estructura base de app.js y configuración inicial de skill | `app.js`, `.gitignore` | `72c8ebd` | ✅ Enviado | Completado |
+| **WRK-002** | Agregar función despedir | Media | Se implementó despedir() y se resolvió conflicto de rebase | `app.js` | `ad8dcfc` | ✅ Enviado | Completado |
+| **WRK-003** | Validar parámetro de nombre | Media | Se implementó validarNombre() para evitar valores vacíos | `app.js` | `bacfbe5` | ✅ Enviado | Completado |
 ```
 
 ---
@@ -82,9 +82,9 @@ Once installed, talk to your agent in Spanish or English:
 > **Agent**:
 > ```text
 > 🎯 Nuevo Issue para ACTIVE_WORK.md:
-> - Código: JYO-004
+> - Código: WRK-004
 > - Título recomendado: Validar formato de email en login
-> - Responsable: @jyovera
+> - Responsable: @worker
 > 
 > ❓ ¿Qué nivel de prioridad le asignamos? (1: Alta, 2: Media, 3: Baja)
 > ```
@@ -94,14 +94,14 @@ Once installed, talk to your agent in Spanish or English:
 > **Agent**:
 > ```text
 > 📋 Inspección de cambios locales:
-> - Issue: JYO-004 (Validar formato de email en login)
+> - Issue: WRK-004 (Validar formato de email en login)
 > - Prioridad: Alta
-> - Responsable: @jyovera
+> - Responsable: @worker
 > - Qué se corrigió / creó: Se implementó expresión regular para validar emails
 > - Archivos: src/auth.js, ACTIVE_WORK.md
 > 
 > 📝 Propuesta de commit (Conventional Commits):
-> > feat(auth): validate email format in login (#JYO-004)
+> > feat(auth): validate email format in login (#WRK-004)
 > 
 > ⚠️ ¿Aprobás realizar este commit en tu máquina local?
 > ```
