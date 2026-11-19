@@ -3,7 +3,7 @@ name: git-workflow-assistant
 description: "Human-in-the-loop Git and GitHub assistant with change traceability. Trigger: commit changes, push to dev/main, branch sync checks, divergence analysis, active work tracking, or safe Git operations across any stack."
 license: MIT
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
   stack: "agnostic"
 ---
 
@@ -14,7 +14,7 @@ A portable, stack-agnostic skill that automates Git operations with mandatory hu
 ## Core Principles
 
 1. **Human-in-the-Loop Gate (MANDATORY)**: Never execute `git commit` or `git push` without presenting the plan, diff summary, and receiving explicit human confirmation.
-2. **Change Traceability via `ACTIVE_WORK.md`**: Every fix, task, or feature must have a tracked issue code (e.g. `ISSUE-001`). The agent recommends a title, requests a priority level (`Alta` / `Media` / `Baja`), auto-detects the Git/GitHub author handle, and records the full lifecycle (`Local Commit` -> `Pushed to Dev`).
+2. **Change Traceability via `ACTIVE_WORK.md`**: Every fix, task, or feature must have a tracked issue code (e.g. `ISSUE-001`). The agent recommends a title, requests a priority level (`Alta` / `Media` / `Baja`), auto-detects author handle, documents a brief technical description of what was fixed or created, and records the full lifecycle (`Local Commit` -> `Pushed to Dev`).
 3. **Stack Agnostic**: Rely solely on standard `git` CLI commands. Never introduce runtime dependencies (Node.js, Python, etc.) into the target repository.
 4. **Never Bypass Client Hooks**: Never append `--no-verify` or `-n`. If a client hook (Husky, pre-commit, linters) fails, inspect the error output, present it to the user, and fix the root cause.
 5. **Divergence-First Pushing**: Before pushing to any branch (especially shared branches like `dev` or `main`), inspect remote state with `git fetch` and evaluate how many commits ahead and behind the local branch is.
@@ -32,8 +32,8 @@ Check if `ACTIVE_WORK.md` exists in the repository root. If not, initialize it w
 ```markdown
 # 📋 Registro de Trabajo Activo (Active Work Log)
 
-| Código | Título del Issue | Prioridad | Responsable | Archivos afectados | Commit Local | Enviado a Dev | Estado |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Código | Título del Issue | Prioridad | Responsable | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Commit Local | Enviado a Dev | Estado |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 ```
 
 ### 0.2 Issue Creation Interaction
@@ -43,7 +43,6 @@ Before modifying code:
 3. **Detect Author**: Extract user identity from Git configuration:
    ```bash
    git config user.name
-   # Or extract handle from remote origin / git credentials if available
    ```
 4. **Prompt for Priority**: Present the standardized Issue Registration Template:
 
@@ -59,10 +58,11 @@ Before modifying code:
 3. Baja (Low)
 ```
 
-**Wait for the user's priority selection.** Once confirmed, register the new row in `ACTIVE_WORK.md` with `Estado: En progreso` and `Enviado a Dev: ⏳ No`.
+**Wait for the user's priority selection.** Once confirmed, register the new row in `ACTIVE_WORK.md` with `Qué se corrigió / creó: En desarrollo...`, `Estado: En progreso`, and `Enviado a Dev: ⏳ No`.
 
 ### 0.3 Lifecycle Updates
 - As code is written: update `Archivos afectados`.
+- When preparing the commit: write the concise technical summary under `Qué se corrigió / creó`.
 - When committed locally: update `Commit Local: <hash>` and `Estado: Commiteado en local`.
 - When pushed to `dev`: update `Enviado a Dev: ✅ Enviado` and `Estado: Completado`.
 
@@ -96,9 +96,10 @@ Present to the user using this structured response template:
 ```text
 📋 Inspección de cambios locales:
 - Issue: ISSUE-XXX ([Título del Issue])
+- Prioridad: [Alta / Media / Baja]
 - Responsable: @[usuario]
+- Qué se corrigió / creó: [Breve descripción técnica de lo que se resolvió o implementó]
 - Archivos a incluir: [lista de archivos]
-- Resumen del diff: [resumen en 1 o 2 líneas]
 
 📝 Propuesta de commit (Conventional Commits):
 > tipo(alcance): descripción del cambio (#ISSUE-XXX)
@@ -114,7 +115,10 @@ Once approved:
 git add <target-files>
 git commit -m "<approved-message>"
 ```
-Update `ACTIVE_WORK.md` with the new commit hash and commit message.
+Update `ACTIVE_WORK.md`:
+- Insert the exact technical summary under `Qué se corrigió / creó`.
+- Record the commit hash under `Commit Local`.
+- Set `Estado: Commiteado en local`.
 
 ### Step 1.5: Hook Failure Handling
 If `git commit` fails due to a pre-commit hook (e.g. Husky, ESLint, Prettier, pytest):
