@@ -100,17 +100,7 @@ git rev-list --left-right --count HEAD...origin/<target-branch>
 ### Step 2.4: Evaluate Divergence & Advise
 
 - **Case A: Clean Push (`Ahead > 0`, `Behind == 0`)**
-  - Inform the user: *"Your branch is `<Ahead>` commit(s) ahead of `origin/<target-branch>` with no upstream divergence."*
-  - Show the one-line commit log that will be pushed:
-    ```bash
-    git log origin/<target-branch>..HEAD --oneline
-    ```
-  - **Ask for confirmation before pushing.**
-  - Once confirmed, execute:
-    ```bash
-    git push origin <current-branch>:<target-branch>
-    # or git push origin <current-branch> if branches match
-    ```
+  - Proceed to **Step 2.5 (Pre-Push Functional Verification Gate)** before asking for final push confirmation.
 
 - **Case B: Remote is Ahead (`Behind > 0`)**
   - **STOP and WARN the user**: *"Remote `origin/<target-branch>` has `<Behind>` new commit(s) that you do not have locally."*
@@ -121,10 +111,22 @@ git rev-list --left-right --count HEAD...origin/<target-branch>
   - Propose safe synchronization:
     - Option 1 (Recommended): `git pull --rebase origin <target-branch>` to replay local commits on top of latest remote commits.
     - Option 2: `git pull origin <target-branch>` for a merge commit.
+  - After rebase/merge and resolving any conflicts, proceed to **Step 2.5 (Pre-Push Functional Verification Gate)**.
   - Do NOT force push (`--force` is strictly forbidden unless explicitly requested for a personal feature branch with user understanding).
 
 - **Case C: Up-to-date (`Ahead == 0`, `Behind == 0`)**
   - Inform the user that the branch is already synchronized with remote. No push needed.
+
+### Step 2.5: Mandatory Pre-Push Functional Verification Gate
+Never push unverified code to shared branches (`dev`, `main`):
+1. **Identify Project Verification Command**: Detect the project's test, build, or syntax check command (e.g. `npm test` / `node <entry>`, `pytest`, `go test ./...`, `cargo test`, `dotnet test`).
+2. **Execute Validation**: Run the check to ensure incoming changes and integrated commits didn't break runtime functionality.
+3. **Report Outcome**: Present test/validation output to the user alongside the commit summary.
+4. **Final Approval**: Only ask for the final push authorization once verification passes cleanly.
+5. **Execution**:
+   ```bash
+   git push origin <current-branch>:<target-branch>
+   ```
 
 ---
 
