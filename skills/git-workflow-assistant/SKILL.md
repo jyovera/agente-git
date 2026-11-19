@@ -1,20 +1,20 @@
 ---
 name: git-workflow-assistant
-description: "Human-in-the-loop Git and GitHub assistant with change traceability. Trigger: commit changes, push to dev/main, branch sync checks, divergence analysis, active work tracking, or safe Git operations across any stack."
+description: "Human-in-the-loop Git and GitHub assistant with multi-developer change traceability. Trigger: commit changes, push to dev/main, branch sync checks, divergence analysis, active work tracking, or safe Git operations across any stack."
 license: MIT
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
   stack: "agnostic"
 ---
 
 # Git Workflow Assistant
 
-A portable, stack-agnostic skill that automates Git operations with mandatory human-in-the-loop approval, safe divergence checks, coexistence with existing repository hooks (such as Husky or native pre-commit), and complete change traceability through `ACTIVE_WORK.md`.
+A portable, stack-agnostic skill that automates Git operations with mandatory human-in-the-loop approval, safe divergence checks, coexistence with existing repository hooks (such as Husky or native pre-commit), and collision-free multi-developer change traceability through `ACTIVE_WORK.md`.
 
 ## Core Principles
 
 1. **Human-in-the-Loop Gate (MANDATORY)**: Never execute `git commit` or `git push` without presenting the plan, diff summary, and receiving explicit human confirmation.
-2. **Change Traceability via `ACTIVE_WORK.md`**: Every fix, task, or feature must have a tracked issue code (e.g. `ISSUE-001`). The agent recommends a title, requests a priority level (`Alta` / `Media` / `Baja`), auto-detects author handle, documents a brief technical description of what was fixed or created, and records the full lifecycle (`Local Commit` -> `Pushed to Dev`).
+2. **Conflict-Free Traceability via Namespaced Sections**: To prevent merge conflicts and duplicate issue IDs in collaborative teams, `ACTIVE_WORK.md` is partitioned into dedicated sections per developer (`## 👤 @username`). Issue codes use user-specific prefixes (e.g. `JYO-001`, `CAR-001`), guaranteeing zero ID collisions.
 3. **Stack Agnostic**: Rely solely on standard `git` CLI commands. Never introduce runtime dependencies (Node.js, Python, etc.) into the target repository.
 4. **Never Bypass Client Hooks**: Never append `--no-verify` or `-n`. If a client hook (Husky, pre-commit, linters) fails, inspect the error output, present it to the user, and fix the root cause.
 5. **Divergence-First Pushing**: Before pushing to any branch (especially shared branches like `dev` or `main`), inspect remote state with `git fetch` and evaluate how many commits ahead and behind the local branch is.
@@ -22,35 +22,47 @@ A portable, stack-agnostic skill that automates Git operations with mandatory hu
 
 ---
 
-## Workflow 0: Traceability & Issue Registration (`ACTIVE_WORK.md`)
+## Workflow 0: Namespaced Traceability (`ACTIVE_WORK.md`)
 
 Whenever work begins on a fix, improvement, or feature:
 
-### 0.1 Initialization of `ACTIVE_WORK.md`
-Check if `ACTIVE_WORK.md` exists in the repository root. If not, initialize it with this standard table:
+### 0.1 Initialization & Structure of `ACTIVE_WORK.md`
+Check if `ACTIVE_WORK.md` exists in the repository root. If not, initialize it with a top-level header:
 
 ```markdown
 # 📋 Registro de Trabajo Activo (Active Work Log)
-
-| Código | Título del Issue | Prioridad | Responsable | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Commit Local | Enviado a Dev | Estado |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 ```
 
-### 0.2 Issue Creation Interaction
-Before modifying code:
-1. **Assign Sequential ID**: Calculate next code (`ISSUE-001`, `ISSUE-002`, etc.).
-2. **Recommend Title**: Analyze user request and propose a concise, descriptive title.
-3. **Detect Author**: Extract user identity from Git configuration:
+### 0.2 Developer Detection & Prefix Generation
+1. Extract current developer identity:
    ```bash
    git config user.name
    ```
-4. **Prompt for Priority**: Present the standardized Issue Registration Template:
+2. Derive a 3-letter uppercase prefix based on the developer handle or name:
+   - `@jyovera` -> Prefix: `JYO`
+   - `@carlos` -> Prefix: `CAR`
+   - `@maria` -> Prefix: `MAR`
+
+3. Check if the developer section `## 👤 @<user>` already exists in `ACTIVE_WORK.md`.
+   If it does NOT exist, create the section and its dedicated table:
+
+```markdown
+## 👤 @[usuario]
+| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Commit Local | Enviado a Dev | Estado |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+```
+
+### 0.3 Issue Registration Interaction
+Before modifying code:
+1. **Assign Namespaced ID**: Look at the developer's table and calculate the next sequential code (`JYO-001`, `JYO-002`, `JYO-003`, etc.).
+2. **Recommend Title**: Analyze user request and propose a concise, descriptive title.
+3. **Prompt for Priority**: Present the standardized Issue Registration Template:
 
 ```text
 🎯 Nuevo Issue para ACTIVE_WORK.md:
-- Código: ISSUE-XXX
+- Código: [PREFIX]-XXX
 - Título recomendado: [Título propuesto]
-- Responsable: @[usuario detectado]
+- Responsable: @[usuario]
 
 ❓ ¿Qué nivel de prioridad le asignamos?
 1. Alta (High)
@@ -58,9 +70,9 @@ Before modifying code:
 3. Baja (Low)
 ```
 
-**Wait for the user's priority selection.** Once confirmed, register the new row in `ACTIVE_WORK.md` with `Qué se corrigió / creó: En desarrollo...`, `Estado: En progreso`, and `Enviado a Dev: ⏳ No`.
+**Wait for the user's priority selection.** Once confirmed, register the new row inside that developer's dedicated table with `Qué se corrigió / creó: En desarrollo...`, `Estado: En progreso`, and `Enviado a Dev: ⏳ No`.
 
-### 0.3 Lifecycle Updates
+### 0.4 Lifecycle Updates
 - As code is written: update `Archivos afectados`.
 - When preparing the commit: write the concise technical summary under `Qué se corrigió / creó`.
 - When committed locally: update `Commit Local: <hash>` and `Estado: Commiteado en local`.
@@ -79,14 +91,14 @@ git status --short
 ```
 Identify modified tracked files (`M`), untracked files (`??`), and staged/unstaged diffs. Never run `git add .` blindly when unknown untracked files exist (`.env`, secrets, build artifacts).
 
-### Step 1.2: Craft Conventional Commit with Issue Reference
-Format commit messages following Conventional Commits, linking the issue code from `ACTIVE_WORK.md`:
-- `feat(<scope>): <description> (#ISSUE-XXX)`
-- `fix(<scope>): <description> (#ISSUE-XXX)`
-- `refactor(<scope>): <description> (#ISSUE-XXX)`
-- `chore(<scope>): <description> (#ISSUE-XXX)`
-- `test(<scope>): <description> (#ISSUE-XXX)`
-- `docs(<scope>): <description> (#ISSUE-XXX)`
+### Step 1.2: Craft Conventional Commit with Namespaced Reference
+Format commit messages following Conventional Commits, linking the namespaced issue code from the user's table in `ACTIVE_WORK.md`:
+- `feat(<scope>): <description> (#[PREFIX]-XXX)`
+- `fix(<scope>): <description> (#[PREFIX]-XXX)`
+- `refactor(<scope>): <description> (#[PREFIX]-XXX)`
+- `chore(<scope>): <description> (#[PREFIX]-XXX)`
+- `test(<scope>): <description> (#[PREFIX]-XXX)`
+- `docs(<scope>): <description> (#[PREFIX]-XXX)`
 
 Do NOT add AI co-author trailers or attribution.
 
@@ -95,14 +107,14 @@ Present to the user using this structured response template:
 
 ```text
 📋 Inspección de cambios locales:
-- Issue: ISSUE-XXX ([Título del Issue])
+- Issue: [PREFIX]-XXX ([Título del Issue])
 - Prioridad: [Alta / Media / Baja]
 - Responsable: @[usuario]
 - Qué se corrigió / creó: [Breve descripción técnica de lo que se resolvió o implementó]
 - Archivos a incluir: [lista de archivos]
 
 📝 Propuesta de commit (Conventional Commits):
-> tipo(alcance): descripción del cambio (#ISSUE-XXX)
+> tipo(alcance): descripción del cambio (#[PREFIX]-XXX)
 
 ⚠️ ¿Aprobás realizar este commit en tu máquina local?
 ```
@@ -115,7 +127,7 @@ Once approved:
 git add <target-files>
 git commit -m "<approved-message>"
 ```
-Update `ACTIVE_WORK.md`:
+Update `ACTIVE_WORK.md` under the user's table:
 - Insert the exact technical summary under `Qué se corrigió / creó`.
 - Record the commit hash under `Commit Local`.
 - Set `Estado: Commiteado en local`.
@@ -215,7 +227,7 @@ Never push unverified code to shared branches:
 ```bash
 git push origin <current-branch>:<target-branch>
 ```
-5. Update `ACTIVE_WORK.md` marking `Enviado a Dev: ✅ Enviado` and `Estado: Completado`.
+5. Update `ACTIVE_WORK.md` under the user's table marking `Enviado a Dev: ✅ Enviado` and `Estado: Completado`.
 
 ---
 
