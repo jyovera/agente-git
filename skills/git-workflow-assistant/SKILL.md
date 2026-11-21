@@ -75,10 +75,12 @@ Before modifying code:
 **Wait for the user's priority selection.** Once confirmed, register the new row inside that developer's dedicated table with `Qué se corrigió / creó: En desarrollo...`, `Archivos afectados: (en edición)`, and `Estado: 🟡 En progreso`.
 
 ### 0.4 Lifecycle Updates
-- As code is written: update `Archivos afectados`.
-- When preparing and approving the commit: update `Qué se corrigió / creó` with the concise technical summary and set `Estado: 🟢 Completado`.
+- As code is written: update `Archivos afectados` (remains `🟡 En progreso`).
+- Incremental commits (WIP / progress checkpoint): update `Qué se corrigió / creó` with progress and keep `Estado: 🟡 En progreso`.
+- Task delivery commit: update `Qué se corrigió / creó` with the definitive technical summary and set `Estado: 🔵 En revisión`.
 - Stage and commit atomically: `git add <target-files> ACTIVE_WORK.md && git commit -m "..."`.
-- When pushed: `git push origin <branch>`. No files are touched after push; the working tree remains 100% clean (`working tree clean`).
+- When pushed to remote: `git push origin <branch>`. No files are touched after push; the working tree remains 100% clean.
+- When formally approved / verified (QA, Lead, or merge to main): update row to `Estado: 🟢 Completado`.
 
 ---
 
@@ -112,6 +114,7 @@ Present to the user using this structured response template:
 - Issue: [PREFIX]-XXX ([Título del Issue])
 - Prioridad: [Alta / Media / Baja]
 - Responsable: @[usuario]
+- ¿Completa la tarea?: [ Sí (🔵 En revisión) / No, es avance parcial (🟡 En progreso) ]
 - Qué se corrigió / creó: [Breve descripción técnica de lo que se resolvió o implementó]
 - Archivos a incluir: [lista de archivos de código], ACTIVE_WORK.md
 
@@ -128,7 +131,7 @@ Once approved:
 1. Update `ACTIVE_WORK.md` under the user's table:
    - Insert the exact technical summary under `Qué se corrigió / creó`.
    - Update `Archivos afectados` with the final file list.
-   - Set `Estado: 🟢 Completado`.
+   - Set `Estado: 🔵 En revisión` if the commit completes the task, or keep `Estado: 🟡 En progreso` if it is an incremental progress checkpoint.
 2. Stage modified files and the updated log together:
    ```bash
    git add <target-files> ACTIVE_WORK.md

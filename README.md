@@ -97,6 +97,7 @@ Once installed, talk to your agent in Spanish or English:
 > - Issue: WRK-004 (Validar formato de email en login)
 > - Prioridad: Alta
 > - Responsable: @worker
+> - ¿Completa la tarea?: Sí (🔵 En revisión)
 > - Qué se corrigió / creó: Se implementó expresión regular para validar emails
 > - Archivos: src/auth.js, ACTIVE_WORK.md
 > 
