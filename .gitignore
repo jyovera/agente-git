@@ -18,6 +18,7 @@ yarn-error.log*
 # Local IDE & Agent configurations (keep repository neutral)
 .opencode/
 .agent/
+.atl/
 .vscode/
 .idea/
 

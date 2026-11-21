@@ -104,8 +104,8 @@ async function main() {
 
 ## 👤 @${user}
 
-| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Commit Local | Enviado a Dev | Estado |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Estado |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 `;
         fs.writeFileSync(activeWorkPath, initialActiveWork);
         console.log(`  ${green}✔${reset} Inicializado ${dim}ACTIVE_WORK.md${reset} con tu sección @${user}`);

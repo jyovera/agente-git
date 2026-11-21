@@ -1,6 +1,6 @@
 {
   "name": "agente-git",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Portable, stack-agnostic Git and GitHub workflow assistant skill for OpenCode and AntiGravity with change traceability",
   "type": "module",
   "bin": {

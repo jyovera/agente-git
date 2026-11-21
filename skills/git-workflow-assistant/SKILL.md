@@ -3,18 +3,18 @@ name: git-workflow-assistant
 description: "Human-in-the-loop Git and GitHub assistant with multi-developer change traceability. Trigger: commit changes, push to dev/main, branch sync checks, divergence analysis, active work tracking, or safe Git operations across any stack."
 license: MIT
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
   stack: "agnostic"
 ---
 
 # Git Workflow Assistant
 
-A portable, stack-agnostic skill that automates Git operations with mandatory human-in-the-loop approval, safe divergence checks, coexistence with existing repository hooks (such as Husky or native pre-commit), and collision-free multi-developer change traceability through `ACTIVE_WORK.md`.
+A portable, stack-agnostic skill that automates Git operations with mandatory human-in-the-loop approval, safe divergence checks, coexistence with existing repository hooks (such as Husky or native pre-commit), and collision-free multi-developer atomic change traceability through `ACTIVE_WORK.md`.
 
 ## Core Principles
 
 1. **Human-in-the-Loop Gate (MANDATORY)**: Never execute `git commit` or `git push` without presenting the plan, diff summary, and receiving explicit human confirmation.
-2. **Conflict-Free Traceability via Namespaced Sections**: To prevent merge conflicts and duplicate issue IDs in collaborative teams, `ACTIVE_WORK.md` is partitioned into dedicated sections per developer (`## 👤 @username`). Issue codes use user-specific prefixes (e.g. `JYO-001`, `CAR-001`), guaranteeing zero ID collisions.
+2. **Atomic Traceability via Namespaced Sections**: To prevent merge conflicts and duplicate issue IDs in collaborative teams, `ACTIVE_WORK.md` is partitioned into dedicated sections per developer (`## 👤 @username`). Issue codes use user-specific prefixes (e.g. `JYO-001`, `CAR-001`), guaranteeing zero ID collisions. All traceability updates are committed **atomically** in the same transaction as code changes (`git add <files> ACTIVE_WORK.md`), preventing dirty working trees and ensuring remote sync.
 3. **Stack Agnostic**: Rely solely on standard `git` CLI commands. Never introduce runtime dependencies (Node.js, Python, etc.) into the target repository.
 4. **Never Bypass Client Hooks**: Never append `--no-verify` or `-n`. If a client hook (Husky, pre-commit, linters) fails, inspect the error output, present it to the user, and fix the root cause.
 5. **Divergence-First Pushing**: Before pushing to any branch (especially shared branches like `dev` or `main`), inspect remote state with `git fetch` and evaluate how many commits ahead and behind the local branch is.
@@ -48,9 +48,11 @@ Check if `ACTIVE_WORK.md` exists in the repository root. If not, initialize it w
 
 ```markdown
 ## 👤 @[usuario]
-| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Commit Local | Enviado a Dev | Estado |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Estado |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 ```
+
+*(Nota de compatibilidad: Si un repositorio ya cuenta con una tabla de 8 columnas que incluye `Commit Local` y `Enviado a Dev`, mantener compatibilidad llenando `Commit Local: (#[PREFIX]-XXX)` y `Enviado a Dev: ✅ En entrega` sin romper el formato existente).*
 
 ### 0.3 Issue Registration Interaction
 Before modifying code:
@@ -70,13 +72,13 @@ Before modifying code:
 3. Baja (Low)
 ```
 
-**Wait for the user's priority selection.** Once confirmed, register the new row inside that developer's dedicated table with `Qué se corrigió / creó: En desarrollo...`, `Estado: En progreso`, and `Enviado a Dev: ⏳ No`.
+**Wait for the user's priority selection.** Once confirmed, register the new row inside that developer's dedicated table with `Qué se corrigió / creó: En desarrollo...`, `Archivos afectados: (en edición)`, and `Estado: 🟡 En progreso`.
 
 ### 0.4 Lifecycle Updates
 - As code is written: update `Archivos afectados`.
-- When preparing the commit: write the concise technical summary under `Qué se corrigió / creó`.
-- When committed locally: update `Commit Local: <hash>` and `Estado: Commiteado en local`.
-- When pushed to `dev`: update `Enviado a Dev: ✅ Enviado` and `Estado: Completado`.
+- When preparing and approving the commit: update `Qué se corrigió / creó` with the concise technical summary and set `Estado: 🟢 Completado`.
+- Stage and commit atomically: `git add <target-files> ACTIVE_WORK.md && git commit -m "..."`.
+- When pushed: `git push origin <branch>`. No files are touched after push; the working tree remains 100% clean (`working tree clean`).
 
 ---
 
@@ -111,7 +113,7 @@ Present to the user using this structured response template:
 - Prioridad: [Alta / Media / Baja]
 - Responsable: @[usuario]
 - Qué se corrigió / creó: [Breve descripción técnica de lo que se resolvió o implementó]
-- Archivos a incluir: [lista de archivos]
+- Archivos a incluir: [lista de archivos de código], ACTIVE_WORK.md
 
 📝 Propuesta de commit (Conventional Commits):
 > tipo(alcance): descripción del cambio (#[PREFIX]-XXX)
@@ -121,16 +123,21 @@ Present to the user using this structured response template:
 
 **STOP and wait for the user's explicit confirmation.** Do not proceed without approval.
 
-### Step 1.4: Execution & Table Update
+### Step 1.4: Atomic Table Update & Commit Execution
 Once approved:
-```bash
-git add <target-files>
-git commit -m "<approved-message>"
-```
-Update `ACTIVE_WORK.md` under the user's table:
-- Insert the exact technical summary under `Qué se corrigió / creó`.
-- Record the commit hash under `Commit Local`.
-- Set `Estado: Commiteado en local`.
+1. Update `ACTIVE_WORK.md` under the user's table:
+   - Insert the exact technical summary under `Qué se corrigió / creó`.
+   - Update `Archivos afectados` with the final file list.
+   - Set `Estado: 🟢 Completado`.
+2. Stage modified files and the updated log together:
+   ```bash
+   git add <target-files> ACTIVE_WORK.md
+   ```
+3. Execute the atomic commit:
+   ```bash
+   git commit -m "<approved-message>"
+   ```
+*(Crucial: updating `ACTIVE_WORK.md` BEFORE `git commit` guarantees that code and documentation travel in the exact same Git tree snapshot. It avoids leaving dirty uncommitted files in local and guarantees GitHub receives the updated status synchronously in the subsequent push).*
 
 ### Step 1.5: Hook Failure Handling
 If `git commit` fails due to a pre-commit hook (e.g. Husky, ESLint, Prettier, pytest):
@@ -227,7 +234,8 @@ Never push unverified code to shared branches:
 ```bash
 git push origin <current-branch>:<target-branch>
 ```
-5. Update `ACTIVE_WORK.md` under the user's table marking `Enviado a Dev: ✅ Enviado` and `Estado: Completado`.
+5. Verify clean working directory:
+Do NOT modify `ACTIVE_WORK.md` or any file after the push. The issue log was already updated and committed atomically in Step 1.4. Verify with `git status --short` that the working tree remains 100% clean (`working tree clean`).
 
 ---
 

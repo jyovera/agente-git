@@ -55,8 +55,8 @@ if [ ! -f "ACTIVE_WORK.md" ]; then
 
 ## 👤 @${GIT_USER}
 
-| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Commit Local | Enviado a Dev | Estado |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Estado |
+| :--- | :--- | :--- | :--- | :--- | :--- |
 EOF
     echo -e "  ${GREEN}✔${NC} Inicializado ACTIVE_WORK.md con la sección @${GIT_USER}"
 else

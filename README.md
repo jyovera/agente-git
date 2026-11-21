@@ -64,11 +64,11 @@ AgenteGit/
 
 ## 👤 @worker
 
-| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Commit Local | Enviado a Dev | Estado |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **WRK-001** | Inicializar app base y skill | Alta | Estructura base de app.js y configuración inicial de skill | `app.js`, `.gitignore` | `72c8ebd` | ✅ Enviado | Completado |
-| **WRK-002** | Agregar función despedir | Media | Se implementó despedir() y se resolvió conflicto de rebase | `app.js` | `ad8dcfc` | ✅ Enviado | Completado |
-| **WRK-003** | Validar parámetro de nombre | Media | Se implementó validarNombre() para evitar valores vacíos | `app.js` | `bacfbe5` | ✅ Enviado | Completado |
+| Código | Título del Issue | Prioridad | Qué se corrigió / creó (Breve descripción) | Archivos afectados | Estado |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **WRK-001** | Inicializar app base y skill | Alta | Estructura base de app.js y configuración inicial de skill | `app.js`, `.gitignore` | 🟢 Completado |
+| **WRK-002** | Agregar función despedir | Media | Se implementó despedir() y se resolvió conflicto de rebase | `app.js` | 🟢 Completado |
+| **WRK-003** | Validar parámetro de nombre | Media | Se implementó validarNombre() para evitar valores vacíos | `app.js` | 🟢 Completado |
 ```
 
 ---
